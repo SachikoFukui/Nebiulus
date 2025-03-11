@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Pogodynka</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="card">
+        <div class="szukaj">
+            <input type="text" placeholder="Wpisz nazwę miejsocowości" spellcheck="false">
+            <button><img src="grafika/search.png" alt="🔍"></button>
+        </div>
+        <div class="error">
+            <p>Niepoprawna nazwa miasta!</p>
+        </div>
+        <div class="pogoda">
+            <img src="grafika/rain.png" id="ikona-pogoda">
+            <h1 class="temp">2°C</h1>
+            <h1 class="miasto">Herby</h1>
+            <div class="detale">
+                <div class="col">
+                    <img src="grafika/humidity.png">
+                    <div>
+                        <p class="wilgotnosc">50%</p>
+                        <p>Wilotność</p>
+                    </div>
+                </div>
+                <div class="col">
+                    <img src="grafika/wind.png">
+                    <div>
+                        <p class="wiatr">15km/h</p>
+                        <p>Prędkość wiatru</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+        const api_key = "dcf901dabd3b6bdbf8055db4f6a85cd3";
+        const api_url = "https://api.openweathermap.org/data/2.5/weather?units=metric&q=";
+
+        const searchbox = document.querySelector(".szukaj input");
+        const searchbtn = document.querySelector(".szukaj button");
+        const ikona_pogoda = document.querySelector("#ikona-pogoda")
+
+        var czas = new Date();
+        var godzina = czas.getHours();
+        if(godzina >= 20 && godzina <= 5){
+            document.querySelector(".card").style.background = "#00feb"
+        } else{
+            document.querySelector(".card").style.background = "#1B1833"
+        }
+
+
+        async function sprawdzPogode(miasto){
+            const odpowiedz = await fetch(api_url + miasto + `&appid=${api_key}`);
+
+            if(odpowiedz.status == 404){
+                document.querySelector(".error").style.display = "block";
+                document.querySelector(".pogoda").style.display = "none";
+            } else{
+                
+                var data = await odpowiedz.json();
+
+                document.querySelector(".miasto").innerHTML = data.name;
+                document.querySelector(".temp").innerHTML = Math.round(data.main.temp) + "°C";
+                document.querySelector(".wilgotnosc").innerHTML = data.main.humidity + "%";
+                document.querySelector(".wiatr").innerHTML = data.wind.speed + "km/h";
+                    
+                if(data.weather[0].main == "Clouds"){
+                    ikona_pogoda.src = "grafika/clouds.png"
+                }
+                else if(data.weather[0].main == "Clear"){
+                    ikona_pogoda.src = "grafika/clear.png"
+                }
+                else if(data.weather[0].main == "Rain"){
+                    ikona_pogoda.src = "grafika/rain.png"
+                }
+                else if(data.weather[0].main == "Drizzle"){
+                    ikona_pogoda.src = "grafika/drizzle.png"
+                }
+                else if(data.weather[0].main == "Mist"){
+                    ikona_pogoda.src = "grafika/mist.png"
+                }
+
+                document.querySelector(".pogoda").style.display = "block";
+                document.querySelector(".error").style.display = "none";
+            }
+        }
+        searchbtn.addEventListener("click", ()=> {
+            sprawdzPogode(searchbox.value);
+
+        })
+    </script>
+</body>
+</html>
